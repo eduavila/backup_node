@@ -1,0 +1,16 @@
+{
+  "name": "scriptbackup",
+  "version": "1.0.0",
+  "description": "",
+  "main": "backup.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "moment": "^2.27.0",
+    "ssh2": "^0.8.9",
+    "tar-fs": "^2.1.0"
+  }
+}
