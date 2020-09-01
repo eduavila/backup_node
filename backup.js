@@ -5,19 +5,17 @@ const moment = require('moment');
 
 var listaServidores = [
     {
-        // The host URL
-        host: '192.168.1.1',
-        // The port, usually 22
+        host: '192.168.1.12',
         port: 22,
         // Credentials
         username: 'root',
-        password: '',
+        password: '123',
 
         //Detalhes backup
         diretorioRemoto: '/var/www/arquivos',
         diretorioLocal: __dirname + '/backup/',
         nomeArquivoFinal: 'backup'
-    }
+    },
 ]
 
 listaServidores.forEach(servidor => {
@@ -36,6 +34,7 @@ listaServidores.forEach(servidor => {
     conn.on('ready', function () {
         // Use the transfer directory 
         var startTime = moment();
+        console.log(`[${startTime.format('DD/MM/YYYY hh:mm:ss')}] Iniciando backup: ${servidor.nomeArquivoFinal}`);
 
         transferDirectory(
             // The SSH2 connection
@@ -55,8 +54,9 @@ listaServidores.forEach(servidor => {
                 };
 
                 var duration = moment.duration(moment().diff(startTime));
-                var minutes = duration.asMinutes()
-                console.log(`Backup arquivo ${servidor.nomeArquivoFinal} realizado com sucesso! Tempo: ${minutes}`);
+                var minutes = duration.asMinutes();
+
+                console.log(`[${moment().format('DD/MM/YYYY hh:mm:ss')}] Backup arquivo ${servidor.nomeArquivoFinal} realizado com sucesso! Tempo: ${minutes}`);
 
                 // Finish the connection
                 conn.end();
@@ -65,25 +65,25 @@ listaServidores.forEach(servidor => {
     }).connect(connectionSettings);
 });
 
-const userAccountNotification = {
-    'username': 'Error notifier', // This will appear as user name who posts the message
-    'text': 'Backup iniciado em', // text
-    'icon_emoji': ':bangbang:', // User icon, you can also use custom icons here
-    'attachments': [{ // this defines the attachment block, allows for better layout usage
-        'color': '#eed140', // color of the attachments sidebar.
-        'fields': [ // actual fields
-            {
-                'title': 'Environment', // Custom field
-                'value': 'Production', // Custom value
-                'short': true // long fields will be full width
-            },
-            {
-                'title': 'User ID',
-                'value': '331',
-                'short': true
-            }
-        ]
-    }]
-};
+// const userAccountNotification = {
+//     'username': 'Error notifier', // This will appear as user name who posts the message
+//     'text': 'Backup iniciado em', // text
+//     'icon_emoji': ':bangbang:', // User icon, you can also use custom icons here
+//     'attachments': [{ // this defines the attachment block, allows for better layout usage
+//         'color': '#eed140', // color of the attachments sidebar.
+//         'fields': [ // actual fields
+//             {
+//                 'title': 'Environment', // Custom field
+//                 'value': 'Production', // Custom value
+//                 'short': true // long fields will be full width
+//             },
+//             {
+//                 'title': 'User ID',
+//                 'value': '331',
+//                 'short': true
+//             }
+//         ]
+//     }]
+// };
 
-sendSlackMessage('',userAccountNotification)
+// // sendSlackMessage('',userAccountNotification)
