@@ -14,7 +14,7 @@ var moment = require('moment');
  * @see http://stackoverflow.com/questions/23935283/transfer-entire-directory-using-ssh2-in-nodejs
  */
 exports.transferDirectory = function(conn, remotePath, localPath,nameFile, compression, cb){
-    var cmd = 'tar cf - "' + remotePath + '" 2>/dev/null';
+    var cmd = 'cd ' + remotePath + ' && tar cf - * 2>/dev/null';
 
     if (typeof compression === 'function'){
         cb = compression;
@@ -35,12 +35,13 @@ exports.transferDirectory = function(conn, remotePath, localPath,nameFile, compr
         }
             
         var exitErr;
+        const filePathTar = localPath + nameFile +'_' + moment().format('DDMMYYYY_HHmm') + '.gz';
         var out1 = fs.createWriteStream( localPath + nameFile +'_' + moment().format('DDMMYYYY_HHmm') + '.gz');
 
         stream.pipe(zlib.createGunzip()).pipe(out1);
 
         out1.on('finish', function(){
-            cb(exitErr);
+            cb(exitErr,filePathTar);
         })
     });
 }

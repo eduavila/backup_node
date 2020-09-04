@@ -1,0 +1,12 @@
+[
+    {
+        "host": "192.168.1.1",
+        "port": 22,
+        "username": "root",
+        "password": "",
+        "diretorioRemoto": "/var/www/arquivos/",
+        "diretorioLocal": "/Users/backup/",
+        "nomeArquivoFinal": "test",
+        "url_slack":"https://hooks.slack.com/services/"
+    }
+]

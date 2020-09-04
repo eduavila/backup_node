@@ -2,23 +2,11 @@ const SSH = require('ssh2');
 const { transferDirectory } = require('./transfer.js');
 const { sendSlackMessage } = require('./slack.js');
 const moment = require('moment');
+const fs = require('fs');
 
-var listaServidores = [
-    {
-        host: '192.168.1.12',
-        port: 22,
-        // Credentials
-        username: 'root',
-        password: '123',
+const configuracoes = require('./configuracao.json');
 
-        //Detalhes backup
-        diretorioRemoto: '/var/www/arquivos',
-        diretorioLocal: __dirname + '/backup/',
-        nomeArquivoFinal: 'backup'
-    },
-]
-
-listaServidores.forEach(servidor => {
+configuracoes.forEach(servidor => {
     var conn = new SSH();
 
     var connectionSettings = {
@@ -48,7 +36,7 @@ listaServidores.forEach(servidor => {
             // Define a compression value (true for default 6) with a numerical value
             true,
             // A callback executed once the transference finishes
-            function (err) {
+            function (err,filePathTar) {
                 if (err) {
                     throw err;
                 };
@@ -57,6 +45,12 @@ listaServidores.forEach(servidor => {
                 var minutes = duration.asMinutes();
 
                 console.log(`[${moment().format('DD/MM/YYYY hh:mm:ss')}] Backup arquivo ${servidor.nomeArquivoFinal} realizado com sucesso! Tempo: ${minutes}`);
+                
+
+                var fileBackup = fs.statSync(filePathTar);
+                var fileSizeInMegabytes =  fileBackup.size / 1000000.0;
+
+                sendMessage(servidor,startTime.format('DD/MM/YYYY hh:mm:ss'), servidor.nomeArquivoFinal, minutes,fileSizeInMegabytes);
 
                 // Finish the connection
                 conn.end();
@@ -65,25 +59,40 @@ listaServidores.forEach(servidor => {
     }).connect(connectionSettings);
 });
 
-// const userAccountNotification = {
-//     'username': 'Error notifier', // This will appear as user name who posts the message
-//     'text': 'Backup iniciado em', // text
-//     'icon_emoji': ':bangbang:', // User icon, you can also use custom icons here
-//     'attachments': [{ // this defines the attachment block, allows for better layout usage
-//         'color': '#eed140', // color of the attachments sidebar.
-//         'fields': [ // actual fields
-//             {
-//                 'title': 'Environment', // Custom field
-//                 'value': 'Production', // Custom value
-//                 'short': true // long fields will be full width
-//             },
-//             {
-//                 'title': 'User ID',
-//                 'value': '331',
-//                 'short': true
-//             }
-//         ]
-//     }]
-// };
 
-// // sendSlackMessage('',userAccountNotification)
+
+function sendMessage(configuracao,horaInicio,arquivoFinal,tempDuracao,tamanhoArquivo,error){
+    
+    const userAccountNotification = {
+        'username': 'Bot Backup', // This will appear as user name who posts the message
+        'text': `Backup iniciado em ${horaInicio} `, // text
+        'icon_emoji': ':bangbang:', // User icon, you can also use custom icons here
+        'attachments': [{ // this defines the attachment block, allows for better layout usage
+            'color': '#eed140', // color of the attachments sidebar.
+            'fields': [ // actual fields
+                {
+                    'title': 'Configuração', // Custom field
+                    'value': configuracao.nomeArquivoFinal, // Custom value
+                    'short': true // long fields will be full width
+                },
+                {
+                    'title': 'Arquivo Final',
+                    'value': arquivoFinal,
+                    'short': true
+                },
+                {
+                    'title': 'Tempo Duração',
+                    'value': tempDuracao,
+                    'short': true
+                },
+                {
+                    'title': 'Tamanho Arquivo',
+                    'value': tamanhoArquivo+ 'mb',
+                    'short': true
+                }
+            ]
+        }]
+    };
+    
+    sendSlackMessage(configuracao.url_slack,userAccountNotification)
+}
